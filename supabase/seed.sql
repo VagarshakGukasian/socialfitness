@@ -1,0 +1,2 @@
+-- Optional seed data for local development.
+-- Example: insert into public.challenges (...) values (...);

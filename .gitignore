@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env — секреты не в репозитории; шаблон .env.example коммитим
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +41,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# дубликат проекта (не основное приложение)
+socialfitness/
+
+# при использовании npm не нужен второй lockfile в корне
+pnpm-lock.yaml
