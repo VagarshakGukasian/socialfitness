@@ -22,12 +22,20 @@ export default async function Home() {
         </p>
         <div className="mt-10 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
           {user ? (
-            <Link
-              href="/dashboard"
-              className="inline-flex h-12 items-center justify-center rounded-xl bg-zinc-900 px-8 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
-              Панель
-            </Link>
+            <>
+              <Link
+                href="/challenges"
+                className="inline-flex h-12 items-center justify-center rounded-xl bg-zinc-900 px-8 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              >
+                Челленджи
+              </Link>
+              <Link
+                href="/dashboard"
+                className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-300 bg-white px-8 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+              >
+                Панель
+              </Link>
+            </>
           ) : (
             <>
               <Link
