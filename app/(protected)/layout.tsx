@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { signOut } from "@/app/actions/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProtectedLayout({
@@ -14,8 +13,6 @@ export default async function ProtectedLayout({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-
-  const showAdmin = isAdminEmail(user.email);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -40,14 +37,6 @@ export default async function ProtectedLayout({
             <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-zinc-100">
               Панель
             </Link>
-            {showAdmin && (
-              <Link
-                href="/admin/challenges"
-                className="text-amber-800 hover:text-amber-950 dark:text-amber-300 dark:hover:text-amber-100"
-              >
-                Админ
-              </Link>
-            )}
             <form action={signOut}>
               <button
                 type="submit"

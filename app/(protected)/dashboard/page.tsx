@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
@@ -10,6 +11,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const email = user.email ?? "";
+  const isAdmin = isAdminEmail(email);
   const name =
     (user.user_metadata?.full_name as string | undefined) ??
     (user.user_metadata?.name as string | undefined) ??
@@ -52,6 +54,16 @@ export default async function DashboardPage() {
             Профиль и участие
           </Link>
         </li>
+        {isAdmin && (
+          <li>
+            <Link
+              href="/admin/challenges"
+              className="font-medium text-amber-800 underline underline-offset-4 dark:text-amber-300"
+            >
+              Админка: челленджи
+            </Link>
+          </li>
+        )}
       </ul>
 
       <p className="text-sm text-zinc-500">

@@ -36,7 +36,11 @@ export default async function AdminEditChallengePage({ params }: Props) {
       <h1 className="mt-4 text-xl font-semibold">Редактировать</h1>
       <p className="mt-1 text-sm text-zinc-500">{challenge.title}</p>
 
-      <form action={updateAction} className="mt-8 max-w-xl space-y-6">
+      <form
+        action={updateAction}
+        encType="multipart/form-data"
+        className="mt-8 max-w-xl space-y-6"
+      >
         <ChallengeFormFields challenge={challenge} />
         <div className="flex flex-wrap gap-3">
           <button

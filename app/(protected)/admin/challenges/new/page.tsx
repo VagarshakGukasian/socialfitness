@@ -12,7 +12,11 @@ export default function AdminNewChallengePage() {
         ← К списку
       </Link>
       <h1 className="mt-4 text-xl font-semibold">Новый челлендж</h1>
-      <form action={adminCreateChallenge} className="mt-8 max-w-xl space-y-6">
+      <form
+        action={adminCreateChallenge}
+        encType="multipart/form-data"
+        className="mt-8 max-w-xl space-y-6"
+      >
         <ChallengeFormFields />
         <button
           type="submit"
