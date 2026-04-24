@@ -6,6 +6,31 @@ import { isAdminEmail } from "@/lib/admin";
 import { uploadChallengeCoverImage } from "@/lib/challenge-image-upload";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+async function saveMessageTemplates(
+  admin: SupabaseClient,
+  challengeId: string,
+  raw: string
+) {
+  const lines = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  await admin
+    .from("challenge_message_templates")
+    .delete()
+    .eq("challenge_id", challengeId);
+  if (lines.length === 0) return;
+  const { error } = await admin.from("challenge_message_templates").insert(
+    lines.map((body, position) => ({
+      challenge_id: challengeId,
+      position,
+      body,
+    }))
+  );
+  if (error) throw error;
+}
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -55,6 +80,15 @@ export async function adminCreateChallenge(formData: FormData) {
 
   if (!title) throw new Error("Title is required");
 
+  const scheduleMode = String(
+    formData.get("schedule_mode") ?? "evergreen"
+  ).includes("date")
+    ? "date_range"
+    : "evergreen";
+  const wStart = String(formData.get("window_start") ?? "").trim();
+  const wEnd = String(formData.get("window_end") ?? "").trim();
+  const templatesRaw = String(formData.get("message_templates") ?? "");
+
   const { data, error } = await admin
     .from("challenges")
     .insert({
@@ -64,15 +98,24 @@ export async function adminCreateChallenge(formData: FormData) {
       image_url,
       duration_days,
       interval_days,
+      schedule_mode: scheduleMode,
+      window_start:
+        scheduleMode === "date_range" && wStart
+          ? wStart
+          : null,
+      window_end:
+        scheduleMode === "date_range" && wEnd ? wEnd : null,
     })
     .select("id")
     .single();
 
   if (error) throw error;
+  const id = data.id as string;
+  await saveMessageTemplates(admin, id, templatesRaw);
 
   revalidatePath("/challenges");
   revalidatePath("/admin/challenges");
-  redirect(`/admin/challenges/${data.id}/edit`);
+  redirect(`/admin/challenges/${id}/edit`);
 }
 
 export async function adminUpdateChallenge(challengeId: string, formData: FormData) {
@@ -102,6 +145,15 @@ export async function adminUpdateChallenge(challengeId: string, formData: FormDa
 
   if (!title) throw new Error("Title is required");
 
+  const scheduleMode = String(
+    formData.get("schedule_mode") ?? "evergreen"
+  ).includes("date")
+    ? "date_range"
+    : "evergreen";
+  const wStart = String(formData.get("window_start") ?? "").trim();
+  const wEnd = String(formData.get("window_end") ?? "").trim();
+  const templatesRaw = String(formData.get("message_templates") ?? "");
+
   const { error } = await admin
     .from("challenges")
     .update({
@@ -111,10 +163,18 @@ export async function adminUpdateChallenge(challengeId: string, formData: FormDa
       image_url,
       duration_days,
       interval_days,
+      schedule_mode: scheduleMode,
+      window_start:
+        scheduleMode === "date_range" && wStart
+          ? wStart
+          : null,
+      window_end:
+        scheduleMode === "date_range" && wEnd ? wEnd : null,
     })
     .eq("id", challengeId);
 
   if (error) throw error;
+  await saveMessageTemplates(admin, challengeId, templatesRaw);
 
   revalidatePath("/challenges");
   revalidatePath(`/challenges/${challengeId}`);

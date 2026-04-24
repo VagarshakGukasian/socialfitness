@@ -20,6 +20,15 @@ export default async function AdminEditChallengePage({ params }: Props) {
   if (!data) notFound();
   const challenge = data as ChallengeRow;
 
+  const { data: tmplRows } = await supabase
+    .from("challenge_message_templates")
+    .select("body, position")
+    .eq("challenge_id", id)
+    .order("position", { ascending: true });
+  const messageTemplatesText = (tmplRows ?? [])
+    .map((r) => r.body as string)
+    .join("\n");
+
   async function updateAction(formData: FormData) {
     "use server";
     await adminUpdateChallenge(id, formData);
@@ -41,7 +50,10 @@ export default async function AdminEditChallengePage({ params }: Props) {
         encType="multipart/form-data"
         className="mt-8 max-w-xl space-y-6"
       >
-        <ChallengeFormFields challenge={challenge} />
+        <ChallengeFormFields
+          challenge={challenge}
+          messageTemplatesText={messageTemplatesText}
+        />
         <div className="flex flex-wrap gap-3">
           <button
             type="submit"

@@ -12,7 +12,7 @@ export async function createTeam(name: string) {
 
   const { data, error } = await supabase
     .from("teams")
-    .insert({ name: name.trim(), created_by: user.id })
+    .insert({ name: name.trim(), created_by: user.id, is_solo: false })
     .select("id")
     .single();
 
@@ -24,6 +24,14 @@ export async function createTeam(name: string) {
 
 export async function addTeamMember(teamId: string, userId: string) {
   const supabase = await createClient();
+  const { data: t } = await supabase
+    .from("teams")
+    .select("is_solo")
+    .eq("id", teamId)
+    .single();
+  if (t?.is_solo) {
+    throw new Error("Solo team cannot add members");
+  }
   const { error } = await supabase
     .from("team_members")
     .insert({ team_id: teamId, user_id: userId });
@@ -31,6 +39,30 @@ export async function addTeamMember(teamId: string, userId: string) {
   if (error) throw error;
   revalidatePath(`/teams/${teamId}`);
   revalidatePath(`/teams/${teamId}/members`);
+  revalidatePath("/profile");
+}
+
+export async function removeTeamMember(teamId: string, userId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+  const { data: t } = await supabase
+    .from("teams")
+    .select("is_solo, created_by")
+    .eq("id", teamId)
+    .single();
+  if (t?.is_solo) {
+    throw new Error("Cannot remove members from a solo team");
+  }
+  const { error } = await supabase
+    .from("team_members")
+    .delete()
+    .eq("team_id", teamId)
+    .eq("user_id", userId);
+  if (error) throw error;
+  revalidatePath(`/teams/${teamId}`);
   revalidatePath("/profile");
 }
 

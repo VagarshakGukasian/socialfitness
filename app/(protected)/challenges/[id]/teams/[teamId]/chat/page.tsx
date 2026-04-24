@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import {
-  ChatRoom,
-  type ChatMessageVM,
-} from "@/components/chat-room";
+import { ChatRoom, type ChatMessageVM } from "@/components/chat-room";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = {
   params: Promise<{ id: string; teamId: string }>;
+  searchParams: Promise<{ view?: string }>;
 };
 
-export default async function TeamChallengeChatPage({ params }: Props) {
+export default async function TeamChallengeChatPage({ params, searchParams }: Props) {
   const { id: challengeId, teamId } = await params;
+  const { view } = await searchParams;
+  const allMode = view === "all";
   const supabase = await createClient();
   const {
     data: { user },
@@ -34,16 +34,26 @@ export default async function TeamChallengeChatPage({ params }: Props) {
 
   const { data: team } = await supabase
     .from("teams")
-    .select("name")
+    .select("name, is_solo")
     .eq("id", teamId)
     .maybeSingle();
 
-  const { data: rawMessages } = await supabase
-    .from("challenge_messages")
-    .select("id, is_official, body, created_at, author_id")
-    .eq("challenge_id", challengeId)
-    .or(`is_official.eq.true,team_id.eq.${teamId}`)
-    .order("created_at", { ascending: true });
+  const teamLabel = (team as { is_solo?: boolean } | null)?.is_solo
+    ? "You"
+    : (team?.name as string) ?? "Team";
+
+  const { data: rawMessages } = allMode
+    ? await supabase
+        .from("challenge_messages")
+        .select("id, is_official, body, created_at, author_id, team_id")
+        .eq("challenge_id", challengeId)
+        .order("created_at", { ascending: true })
+    : await supabase
+        .from("challenge_messages")
+        .select("id, is_official, body, created_at, author_id, team_id")
+        .eq("challenge_id", challengeId)
+        .or(`is_official.eq.true,team_id.eq.${teamId}`)
+        .order("created_at", { ascending: true });
 
   const messages = rawMessages ?? [];
   const authorIds = [
@@ -83,37 +93,65 @@ export default async function TeamChallengeChatPage({ params }: Props) {
     }
   }
 
-  const vms: ChatMessageVM[] = messages.map((m) => ({
+  const otherTeamIds = [
+    ...new Set(
+      messages
+        .map((m) => m.team_id as string | null)
+        .filter((x): x is string => Boolean(x) && x !== teamId)
+    ),
+  ];
+  let teamNameById: Record<string, string> = {};
+  if (otherTeamIds.length) {
+    const { data: trows } = await supabase
+      .from("teams")
+      .select("id, name, is_solo")
+      .in("id", otherTeamIds);
+    for (const t of trows ?? []) {
+      teamNameById[t.id as string] = t.is_solo
+        ? "Solo"
+        : ((t.name as string) || "Team");
+    }
+  }
+
+  const vms: ChatMessageVM[] = messages.map((m) => {
+    const tid = m.team_id as string | null;
+    const oth = tid && tid !== teamId ? teamNameById[tid] : null;
+    return {
     id: m.id as string,
     is_official: Boolean(m.is_official),
     body: m.body as string,
     created_at: m.created_at as string,
     author_id: (m.author_id as string | null) ?? null,
     author_name: m.author_id ? nameById[m.author_id as string] ?? null : null,
+    team_id: tid,
+    other_team_label: oth,
     reactions: reactionsByMessage[m.id as string] ?? [],
-  }));
+  };
+  });
+
+  const base = `/challenges/${challengeId}/teams/${teamId}/chat`;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8">
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-4 sm:py-6">
       <Link
         href={`/challenges/${challengeId}`}
-        className="text-sm text-teal-700 hover:underline dark:text-teal-400"
+        className="text-sm text-[var(--accent)] hover:underline"
       >
         ← {challenge?.title ?? "Challenge"}
       </Link>
-      <h1 className="mt-4 text-xl font-semibold">
-        Chat: {team?.name ?? "Team"}
-      </h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        Challenge announcements and your team’s messages in one thread.
-      </p>
+      <h1 className="mt-2 text-lg font-bold sm:text-xl">Chat</h1>
+      <p className="text-sm text-zinc-500">{teamLabel}</p>
 
-      <div className="mt-6 flex-1">
+      <div className="mt-4 flex-1">
         <ChatRoom
           challengeId={challengeId}
           teamId={teamId}
           currentUserId={user.id}
           initialMessages={vms}
+          filterTeamsOnly={!allMode}
+          teamNameLabel={teamLabel}
+          allFeedHref={base + "?view=all"}
+          teamOnlyHref={base}
         />
       </div>
     </div>

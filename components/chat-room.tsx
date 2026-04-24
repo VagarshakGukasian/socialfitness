@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { postTeamMessage } from "@/app/actions/messages";
@@ -12,6 +13,8 @@ export type ChatMessageVM = {
   created_at: string;
   author_id: string | null;
   author_name: string | null;
+  team_id?: string | null;
+  other_team_label?: string | null;
   reactions: { emoji: string; user_id: string }[];
 };
 
@@ -22,11 +25,19 @@ export function ChatRoom({
   teamId,
   currentUserId,
   initialMessages,
+  filterTeamsOnly = true,
+  teamNameLabel = "Team",
+  allFeedHref,
+  teamOnlyHref,
 }: {
   challengeId: string;
   teamId: string;
   currentUserId: string;
   initialMessages: ChatMessageVM[];
+  filterTeamsOnly?: boolean;
+  teamNameLabel?: string;
+  allFeedHref: string;
+  teamOnlyHref: string;
 }) {
   const router = useRouter();
   const [text, setText] = useState("");
@@ -75,9 +86,34 @@ export function ChatRoom({
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
   }
 
+  const inAllMode = !filterTeamsOnly;
+
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <ul className="flex max-h-[min(70vh,560px)] flex-col gap-3 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+    <div className="flex flex-1 flex-col gap-3">
+      <div className="flex rounded-2xl border border-zinc-200 p-1 dark:border-zinc-800">
+        <Link
+          href={teamOnlyHref}
+          className={`flex-1 rounded-xl py-2 text-center text-xs font-semibold ${
+            filterTeamsOnly
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+              : "text-zinc-500"
+          }`}
+        >
+          {teamNameLabel}
+        </Link>
+        <Link
+          href={allFeedHref}
+          className={`flex-1 rounded-xl py-2 text-center text-xs font-semibold ${
+            inAllMode
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+              : "text-zinc-500"
+          }`}
+        >
+          All
+        </Link>
+      </div>
+
+      <ul className="flex max-h-[min(64vh,520px)] flex-col gap-3 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50/80 p-3 dark:border-zinc-800 dark:bg-zinc-900/40 sm:p-4">
         {initialMessages.map((m) => (
           <li
             key={m.id}
@@ -88,7 +124,7 @@ export function ChatRoom({
             }`}
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-zinc-500">
-              <span>
+              <span className="flex flex-wrap items-center gap-1.5">
                 {m.is_official ? (
                   <strong className="text-teal-800 dark:text-teal-200">
                     Challenge
@@ -97,6 +133,11 @@ export function ChatRoom({
                   <strong className="text-zinc-800 dark:text-zinc-200">
                     {m.author_name ?? "Member"}
                   </strong>
+                )}
+                {m.other_team_label && (
+                  <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+                    {m.other_team_label}
+                  </span>
                 )}
               </span>
               <time dateTime={m.created_at}>
@@ -128,7 +169,6 @@ export function ChatRoom({
                   <button
                     key={e}
                     type="button"
-                    title={e}
                     onClick={() => toggleReaction(m.id, e)}
                     className="rounded px-1 text-sm hover:bg-zinc-200 dark:hover:bg-zinc-800"
                   >

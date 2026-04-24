@@ -1,16 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Calendar, Clock, Flame } from "lucide-react";
+import { getChallengeJoinWindow } from "@/lib/challenge-schedule";
 import { createClient } from "@/lib/supabase/server";
-
-type ChallengeRow = {
-  id: string;
-  slug: string;
-  title: string;
-  description: string | null;
-  duration_days: number | null;
-  image_url: string | null;
-  interval_days: number;
-};
+import type { ChallengeRow } from "@/lib/types/challenge";
 
 export default async function ChallengesPage() {
   const supabase = await createClient();
@@ -40,14 +33,15 @@ export default async function ChallengesPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Challenges</h1>
-      <p className="mt-2 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
-        Pick a program. You join as a team — create or join a team first on
-        the Teams page.
-      </p>
+    <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-4 sm:py-8">
+      <div className="flex items-end gap-2">
+        <Flame className="h-8 w-8 text-[var(--accent)]" aria-hidden />
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          Challenges
+        </h1>
+      </div>
 
-      <ul className="mt-10 grid gap-8 sm:grid-cols-2">
+      <ul className="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-5">
         {list.map((c) => {
           const stats = statsById[c.id] ?? {
             active_users: 0,
@@ -58,53 +52,64 @@ export default async function ChallengesPage() {
             : c.image_url || "/challenges/30-day-abs-cover.svg";
 
           const dayWord = c.interval_days === 1 ? "day" : "days";
+          const jw = getChallengeJoinWindow({
+            schedule_mode: c.schedule_mode ?? "evergreen",
+            window_start: c.window_start ?? null,
+            window_end: c.window_end ?? null,
+          });
+          const jLabel =
+            jw === "open"
+              ? { t: "Open", cl: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200" }
+              : jw === "upcoming"
+                ? { t: "Soon", cl: "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200" }
+                : { t: "Closed", cl: "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300" };
 
           return (
             <li key={c.id}>
               <Link
                 href={`/challenges/${c.id}`}
-                className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-600"
+                className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
               >
                 <div className="relative aspect-[16/9] w-full bg-zinc-100 dark:bg-zinc-900">
                   <Image
                     src={src}
                     alt=""
                     fill
-                    className="object-cover transition group-hover:opacity-95"
+                    className="object-cover transition group-active:scale-[1.01]"
                     sizes="(max-width: 640px) 100vw, 50vw"
                   />
                 </div>
-                <div className="space-y-3 p-5">
-                  <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                    {c.title}
-                  </h2>
+                <div className="space-y-2 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="line-clamp-1 flex-1 text-base font-bold text-zinc-900 dark:text-zinc-50">
+                      {c.title}
+                    </h2>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${jLabel.cl}`}
+                    >
+                      {jLabel.t}
+                    </span>
+                  </div>
                   {c.description && (
-                    <p className="line-clamp-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    <p className="line-clamp-2 text-sm text-zinc-500">
                       {c.description}
                     </p>
                   )}
-                  <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
-                    <span>
-                      Active now:{" "}
-                      <strong className="text-zinc-800 dark:text-zinc-200">
-                        {stats.active_users}
-                      </strong>{" "}
-                      users
+                  <div className="flex flex-wrap gap-2 text-[11px] text-zinc-500">
+                    <span className="inline-flex items-center gap-0.5">
+                      <Clock className="h-3 w-3" />
+                      {c.interval_days}d cycle
                     </span>
+                    {c.duration_days && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <Calendar className="h-3 w-3" />
+                        {c.duration_days}d program
+                      </span>
+                    )}
                     <span>
-                      Completed:{" "}
-                      <strong className="text-zinc-800 dark:text-zinc-200">
-                        {stats.completed_users}
-                      </strong>{" "}
-                      users
+                      {stats.active_users} in · {stats.completed_users} done
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-500">
-                    Challenge posts every {c.interval_days} {dayWord}
-                    {c.duration_days
-                      ? ` · ${c.duration_days} days total`
-                      : null}
-                  </p>
                 </div>
               </Link>
             </li>
@@ -113,7 +118,7 @@ export default async function ChallengesPage() {
       </ul>
 
       {list.length === 0 && (
-        <p className="mt-8 text-sm text-zinc-500">No challenges yet.</p>
+        <p className="mt-8 text-sm text-zinc-500">Nothing here yet.</p>
       )}
     </div>
   );

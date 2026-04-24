@@ -1,7 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LayoutGrid, Shield } from "lucide-react";
 import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
+
+const links: { href: string; label: string }[] = [
+  { href: "/challenges", label: "Challenges" },
+  { href: "/feed", label: "Feed" },
+  { href: "/users", label: "People" },
+  { href: "/teams", label: "Teams" },
+  { href: "/profile", label: "Profile" },
+  { href: "/", label: "Home" },
+];
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -18,52 +28,36 @@ export default async function DashboardPage() {
     email;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 py-10">
-      <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-zinc-200 pb-4 text-sm font-medium dark:border-zinc-800">
-        <Link
-          href="/challenges"
-          className="text-teal-700 hover:underline dark:text-teal-400"
-        >
-          Challenges
-        </Link>
-        <Link
-          href="/teams"
-          className="text-teal-700 hover:underline dark:text-teal-400"
-        >
-          Teams
-        </Link>
-        <Link
-          href="/profile"
-          className="text-teal-700 hover:underline dark:text-teal-400"
-        >
-          Profile
-        </Link>
+    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-4 sm:py-10">
+      <div className="flex items-center gap-2 text-xl font-bold">
+        <LayoutGrid className="h-6 w-6 text-[var(--accent)]" />
+        Hub
+      </div>
+      <p className="text-sm text-zinc-500">Hi, {name.split("@")[0]}</p>
+
+      <nav
+        className="flex flex-wrap gap-2"
+        aria-label="Shortcuts"
+      >
+        {links.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="rounded-2xl border border-zinc-200 px-3 py-2 text-sm font-semibold text-zinc-800 dark:border-zinc-800 dark:text-zinc-200"
+          >
+            {l.label}
+          </Link>
+        ))}
         {isAdmin && (
           <Link
             href="/admin/challenges"
-            className="text-amber-800 hover:underline dark:text-amber-300"
+            className="inline-flex items-center gap-1 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
           >
+            <Shield className="h-3.5 w-3.5" />
             Admin
           </Link>
         )}
-        <Link href="/" className="text-zinc-500 hover:underline">
-          Home
-        </Link>
       </nav>
-
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Signed in as{" "}
-          <span className="font-medium text-zinc-900 dark:text-zinc-100">
-            {name}
-          </span>
-        </p>
-      </div>
-
-      <p className="text-sm text-zinc-500">
-        Use the links above to move around the app.
-      </p>
     </div>
   );
 }

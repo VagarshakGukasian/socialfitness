@@ -10,113 +10,66 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("display_name")
+    .select("display_name, email")
     .eq("id", user.id)
     .maybeSingle();
 
-  const { data: memberRows } = await supabase
+  const { count: postCount } = await supabase
+    .from("challenge_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("author_id", user.id)
+    .eq("is_official", false);
+
+  const { data: tmem } = await supabase
     .from("team_members")
     .select("team_id")
     .eq("user_id", user.id);
+  const tids = (tmem ?? []).map((m) => m.team_id as string);
+  const activeCh =
+    tids.length > 0
+      ? await supabase
+          .from("team_challenge_enrollments")
+          .select("id", { count: "exact", head: true })
+          .in("team_id", tids)
+          .is("completed_at", null)
+      : { count: 0 };
 
-  const teamIds = (memberRows ?? []).map((m) => m.team_id as string);
-
-  let teamsById: Record<string, { name: string }> = {};
-  if (teamIds.length) {
-    const { data: ts } = await supabase
-      .from("teams")
-      .select("id, name")
-      .in("id", teamIds);
-    for (const t of ts ?? []) {
-      teamsById[t.id as string] = { name: t.name as string };
-    }
-  }
-
-  const { data: enrollRows } = teamIds.length
-    ? await supabase
-        .from("team_challenge_enrollments")
-        .select("team_id, challenge_id, completed_at, challenges(id, title)")
-        .in("team_id", teamIds)
-    : { data: [] };
-
-  const enrollments = enrollRows ?? [];
+  const name =
+    (profile?.display_name as string)?.trim() || user.email || "You";
+  const initial = name.slice(0, 1).toUpperCase();
 
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        {profile?.display_name ?? user.email}
-      </p>
+    <div>
+      <div className="flex items-center gap-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--accent)]/15 text-2xl font-bold text-[var(--accent)]">
+          {initial}
+        </div>
+        <div>
+          <h1 className="text-xl font-bold">{name}</h1>
+          <p className="text-sm text-zinc-500">{(profile?.email as string) || user.email}</p>
+        </div>
+      </div>
 
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">My teams</h2>
-        <ul className="mt-3 space-y-2">
-          {teamIds.map((tid) => (
-            <li key={tid}>
-              <Link
-                href={`/teams/${tid}`}
-                className="block rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900/50"
-              >
-                {teamsById[tid]?.name ?? tid}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {teamIds.length === 0 && (
-          <p className="mt-2 text-sm text-zinc-500">
-            No teams yet —{" "}
-            <Link href="/teams/new" className="underline">
-              create one
-            </Link>
-            .
+      <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="rounded-2xl border border-zinc-200 px-3 py-3 text-center dark:border-zinc-800">
+          <p className="text-2xl font-bold tabular-nums">
+            {postCount ?? 0}
           </p>
-        )}
-      </section>
-
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">Challenges by team</h2>
-        <ul className="mt-3 space-y-3">
-          {enrollments.map((e) => {
-            const raw = e.challenges;
-            const ch = Array.isArray(raw) ? raw[0] : raw;
-            const challenge =
-              ch && typeof ch === "object" && "id" in ch && "title" in ch
-                ? (ch as { id: string; title: string })
-                : null;
-            const tname = teamsById[e.team_id as string]?.name ?? "Team";
-            if (!challenge) return null;
-            const active = !e.completed_at;
-            return (
-              <li
-                key={`${e.team_id}-${challenge.id}`}
-                className="rounded-xl border border-zinc-200 px-3 py-3 dark:border-zinc-800"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{challenge.title}</p>
-                    <p className="text-sm text-zinc-500">Team: {tname}</p>
-                  </div>
-                  {active ? (
-                    <Link
-                      href={`/challenges/${challenge.id}/teams/${e.team_id}/chat`}
-                      className="text-sm font-medium text-teal-700 dark:text-teal-400"
-                    >
-                      Chat →
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-zinc-500">Completed</span>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        {enrollments.length === 0 && teamIds.length > 0 && (
-          <p className="mt-2 text-sm text-zinc-500">
-            None of your teams are in a challenge yet.
-          </p>
-        )}
-      </section>
+          <p className="text-xs font-medium text-zinc-500">Posts</p>
+        </div>
+        <div className="rounded-2xl border border-zinc-200 px-3 py-3 text-center dark:border-zinc-800">
+          <p className="text-2xl font-bold tabular-nums">{activeCh.count ?? 0}</p>
+          <p className="text-xs font-medium text-zinc-500">Active</p>
+        </div>
+        <div className="col-span-2 rounded-2xl border border-zinc-200 px-3 py-3 sm:col-span-1 dark:border-zinc-800">
+          <Link
+            href="/users"
+            className="block text-center text-sm font-semibold text-[var(--accent)]"
+          >
+            Find people
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

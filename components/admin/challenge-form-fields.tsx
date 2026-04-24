@@ -3,9 +3,12 @@ import type { ChallengeRow } from "@/lib/types/challenge";
 
 export function ChallengeFormFields({
   challenge,
+  messageTemplatesText = "",
 }: {
   challenge?: ChallengeRow | null;
+  messageTemplatesText?: string;
 }) {
+  const sm = challenge?.schedule_mode ?? "evergreen";
   const previewSrc = challenge?.image_url?.trim() || null;
   const isRemoteOrAbsolute =
     previewSrc &&
@@ -89,6 +92,84 @@ export function ChallengeFormFields({
             </div>
           </div>
         )}
+      </div>
+      <div className="space-y-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+        <p className="text-sm font-medium">Join window</p>
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="schedule_mode"
+              value="evergreen"
+              defaultChecked={sm === "evergreen" || !challenge}
+            />
+            Open anytime
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="schedule_mode"
+              value="date_range"
+              defaultChecked={sm === "date_range"}
+            />
+            Fixed dates
+          </label>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label
+              htmlFor="window_start"
+              className="block text-xs font-medium text-zinc-500"
+            >
+              Start
+            </label>
+            <input
+              id="window_start"
+              name="window_start"
+              type="date"
+              defaultValue={challenge?.window_start ?? ""}
+              className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="window_end"
+              className="block text-xs font-medium text-zinc-500"
+            >
+              End
+            </label>
+            <input
+              id="window_end"
+              name="window_end"
+              type="date"
+              defaultValue={challenge?.window_end ?? ""}
+              className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Fixed dates: join only on or between start and end. Ignored for open
+          anytime.
+        </p>
+      </div>
+      <div>
+        <label
+          htmlFor="message_templates"
+          className="block text-sm font-medium"
+        >
+          Official message sequence
+        </label>
+        <textarea
+          id="message_templates"
+          name="message_templates"
+          rows={6}
+          defaultValue={messageTemplatesText}
+          placeholder="One line per post in order. When the list runs out, it loops."
+          className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-950"
+        />
+        <p className="mt-1 text-xs text-zinc-500">
+          Cadence is “every N days” above. Used by automation (when wired).
+        </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
