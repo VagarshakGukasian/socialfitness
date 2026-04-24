@@ -16,7 +16,7 @@ export function AdminDeleteChallengeForm({
     e.preventDefault();
     if (
       !confirm(
-        `Удалить челлендж «${title}»? Это действие необратимо.`
+        `Delete challenge "${title}"? This cannot be undone.`
       )
     ) {
       return;
@@ -33,7 +33,7 @@ export function AdminDeleteChallengeForm({
         disabled={pending}
         className="rounded-lg border border-red-300 bg-red-50 px-3 py-1.5 text-sm text-red-900 hover:bg-red-100 disabled:opacity-60 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200"
       >
-        {pending ? "…" : "Удалить"}
+        {pending ? "…" : "Delete"}
       </button>
     </form>
   );

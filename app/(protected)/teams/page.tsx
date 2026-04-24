@@ -33,12 +33,12 @@ export default async function TeamsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Команды</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Teams</h1>
         <Link
           href="/teams/new"
           className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
         >
-          Новая команда
+          New team
         </Link>
       </div>
 
@@ -50,7 +50,7 @@ export default async function TeamsPage() {
               className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-600"
             >
               <span className="font-medium">{t.name}</span>
-              <span className="text-sm text-zinc-500">Открыть →</span>
+              <span className="text-sm text-zinc-500">Open →</span>
             </Link>
           </li>
         ))}
@@ -58,7 +58,7 @@ export default async function TeamsPage() {
 
       {teams.length === 0 && (
         <p className="mt-8 text-sm text-zinc-500">
-          У вас пока нет команд. Создайте первую.
+          You don’t have any teams yet. Create your first one.
         </p>
       )}
     </div>

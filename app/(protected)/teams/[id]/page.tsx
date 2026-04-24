@@ -35,15 +35,18 @@ export default async function TeamDetailPage({ params }: Props) {
     .eq("team_id", id);
 
   const memberIds = (memberRows ?? []).map((m) => m.user_id as string);
-  let nameByUser: Record<string, string> = {};
+  type Profile = { display_name: string | null; email: string | null };
+  let profileByUser: Record<string, Profile> = {};
   if (memberIds.length) {
     const { data: profs } = await supabase
       .from("users")
-      .select("id, display_name")
+      .select("id, display_name, email")
       .in("id", memberIds);
     for (const p of profs ?? []) {
-      nameByUser[p.id as string] =
-        (p.display_name as string) ?? `${(p.id as string).slice(0, 8)}…`;
+      profileByUser[p.id as string] = {
+        display_name: p.display_name as string | null,
+        email: p.email as string | null,
+      };
     }
   }
 
@@ -58,32 +61,46 @@ export default async function TeamDetailPage({ params }: Props) {
         href="/teams"
         className="text-sm text-teal-700 hover:underline dark:text-teal-400"
       >
-        ← Команды
+        ← Teams
       </Link>
       <h1 className="mt-6 text-2xl font-semibold">{team.name}</h1>
 
       <div className="mt-8 space-y-6">
         <section>
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">Участники</h2>
-            <Link
-              href={`/teams/${id}/members`}
-              className="text-sm font-medium text-teal-700 underline dark:text-teal-400"
-            >
-              Добавить людей
-            </Link>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold">Members</h2>
+            <div className="flex flex-wrap gap-3 text-sm font-medium text-teal-700 dark:text-teal-400">
+              <Link href={`/teams/${id}/members`} className="underline">
+                Search by name
+              </Link>
+              <Link href={`/teams/${id}/users`} className="underline">
+                Browse all users
+              </Link>
+            </div>
           </div>
-          <ul className="mt-3 space-y-2 text-sm">
-            {memberIds.map((uid) => (
-              <li key={uid} className="text-zinc-700 dark:text-zinc-300">
-                {nameByUser[uid] ?? uid.slice(0, 8) + "…"}
-              </li>
-            ))}
+          <ul className="mt-3 space-y-3 text-sm">
+            {memberIds.map((uid) => {
+              const prof = profileByUser[uid];
+              const name =
+                prof?.display_name?.trim() || "—";
+              const email = prof?.email?.trim() || "—";
+              return (
+                <li
+                  key={uid}
+                  className="rounded-lg border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+                >
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {name}
+                  </p>
+                  <p className="text-zinc-500">{email}</p>
+                </li>
+              );
+            })}
           </ul>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold">Челленджи команды</h2>
+          <h2 className="text-lg font-semibold">Team challenges</h2>
           <ul className="mt-3 space-y-2">
             {(enrollments ?? []).map((e) => {
               const raw = e.challenges;
@@ -102,7 +119,7 @@ export default async function TeamDetailPage({ params }: Props) {
                   >
                     <span>{ch.title}</span>
                     <span className="text-zinc-500">
-                      {active ? "Чат →" : "Завершён"}
+                      {active ? "Chat →" : "Completed"}
                     </span>
                   </Link>
                 </li>
@@ -111,7 +128,7 @@ export default async function TeamDetailPage({ params }: Props) {
           </ul>
           {(enrollments ?? []).length === 0 && (
             <p className="mt-2 text-sm text-zinc-500">
-              Пока ни в одном челлендже. Вступите на странице челленджа.
+              Not in any challenge yet. Join from a challenge page.
             </p>
           )}
         </section>

@@ -41,10 +41,10 @@ export default async function ChallengesPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Челленджи</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Challenges</h1>
       <p className="mt-2 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
-        Выберите программу. Участие оформляется от имени команды — создайте или
-        вступите в команду на странице «Команды».
+        Pick a program. You join as a team — create or join a team first on
+        the Teams page.
       </p>
 
       <ul className="mt-10 grid gap-8 sm:grid-cols-2">
@@ -56,6 +56,8 @@ export default async function ChallengesPage() {
           const src = c.image_url?.startsWith("/")
             ? c.image_url
             : c.image_url || "/challenges/30-day-abs-cover.svg";
+
+          const dayWord = c.interval_days === 1 ? "day" : "days";
 
           return (
             <li key={c.id}>
@@ -83,25 +85,24 @@ export default async function ChallengesPage() {
                   )}
                   <div className="flex flex-wrap gap-4 text-xs text-zinc-500">
                     <span>
-                      Сейчас проходят:{" "}
+                      Active now:{" "}
                       <strong className="text-zinc-800 dark:text-zinc-200">
                         {stats.active_users}
                       </strong>{" "}
-                      чел.
+                      users
                     </span>
                     <span>
-                      Прошли:{" "}
+                      Completed:{" "}
                       <strong className="text-zinc-800 dark:text-zinc-200">
                         {stats.completed_users}
                       </strong>{" "}
-                      чел.
+                      users
                     </span>
                   </div>
                   <p className="text-xs text-zinc-500">
-                    Посты челленджа каждые {c.interval_days}{" "}
-                    {c.interval_days === 1 ? "день" : "дн."}
+                    Challenge posts every {c.interval_days} {dayWord}
                     {c.duration_days
-                      ? ` · всего ${c.duration_days} дн.`
+                      ? ` · ${c.duration_days} days total`
                       : null}
                   </p>
                 </div>
@@ -112,7 +113,7 @@ export default async function ChallengesPage() {
       </ul>
 
       {list.length === 0 && (
-        <p className="mt-8 text-sm text-zinc-500">Пока нет челленджей.</p>
+        <p className="mt-8 text-sm text-zinc-500">No challenges yet.</p>
       )}
     </div>
   );

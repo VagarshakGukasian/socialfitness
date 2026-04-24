@@ -26,23 +26,23 @@ export default async function ProtectedLayout({
           </Link>
           <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-zinc-600 dark:text-zinc-400">
             <Link href="/challenges" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-              Челленджи
+              Challenges
             </Link>
             <Link href="/teams" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-              Команды
+              Teams
             </Link>
             <Link href="/profile" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-              Профиль
+              Profile
             </Link>
             <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-zinc-100">
-              Панель
+              Dashboard
             </Link>
             <form action={signOut}>
               <button
                 type="submit"
                 className="text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
               >
-                Выйти
+                Sign out
               </button>
             </form>
           </nav>

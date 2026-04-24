@@ -22,7 +22,7 @@ export function ChallengeFormFields({
       )}
       <div>
         <label htmlFor="title" className="block text-sm font-medium">
-          Название *
+          Title *
         </label>
         <input
           id="title"
@@ -34,22 +34,22 @@ export function ChallengeFormFields({
       </div>
       <div>
         <label htmlFor="slug" className="block text-sm font-medium">
-          Slug (латиница, URL) *
+          Slug (URL, Latin) *
         </label>
         <input
           id="slug"
           name="slug"
           defaultValue={challenge?.slug ?? ""}
-          placeholder="naprimer-30-dney-pressa (пусто — сгенерируется)"
+          placeholder="e.g. 30-day-abs (empty = auto from title)"
           className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
         />
         <p className="mt-1 text-xs text-zinc-500">
-          Уникальный идентификатор в адресе; только a-z, 0-9 и дефис.
+          Unique path segment; only a-z, 0-9, and hyphens.
         </p>
       </div>
       <div>
         <label htmlFor="description" className="block text-sm font-medium">
-          Описание
+          Description
         </label>
         <textarea
           id="description"
@@ -61,7 +61,7 @@ export function ChallengeFormFields({
       </div>
       <div>
         <label htmlFor="image" className="block text-sm font-medium">
-          Обложка
+          Cover image
         </label>
         <input
           id="image"
@@ -71,12 +71,12 @@ export function ChallengeFormFields({
           className="mt-1 block w-full text-sm text-zinc-600 file:mr-3 file:rounded-lg file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-amber-900 dark:text-zinc-400 dark:file:bg-amber-950 dark:file:text-amber-100"
         />
         <p className="mt-1 text-xs text-zinc-500">
-          JPEG, PNG, WebP, GIF или SVG, до 5 МБ. При редактировании оставьте
-          пустым, чтобы сохранить текущую картинку.
+          JPEG, PNG, WebP, GIF, or SVG, up to 5 MB. When editing, leave empty to
+          keep the current image.
         </p>
         {isRemoteOrAbsolute && previewSrc && (
           <div className="mt-3">
-            <p className="mb-2 text-xs text-zinc-500">Сейчас:</p>
+            <p className="mb-2 text-xs text-zinc-500">Current:</p>
             <div className="relative h-36 w-full max-w-md overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
               <Image
                 src={previewSrc}
@@ -93,7 +93,7 @@ export function ChallengeFormFields({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="duration_days" className="block text-sm font-medium">
-            Длительность (дней)
+            Duration (days)
           </label>
           <input
             id="duration_days"
@@ -106,7 +106,7 @@ export function ChallengeFormFields({
         </div>
         <div>
           <label htmlFor="interval_days" className="block text-sm font-medium">
-            Посты челленджа каждые N дней
+            Official posts every N days
           </label>
           <input
             id="interval_days"

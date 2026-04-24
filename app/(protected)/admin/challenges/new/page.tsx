@@ -9,9 +9,9 @@ export default function AdminNewChallengePage() {
         href="/admin/challenges"
         className="text-sm text-amber-900 underline dark:text-amber-200"
       >
-        ← К списку
+        ← Back to list
       </Link>
-      <h1 className="mt-4 text-xl font-semibold">Новый челлендж</h1>
+      <h1 className="mt-4 text-xl font-semibold">New challenge</h1>
       <form
         action={adminCreateChallenge}
         encType="multipart/form-data"
@@ -22,7 +22,7 @@ export default function AdminNewChallengePage() {
           type="submit"
           className="rounded-xl bg-amber-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500"
         >
-          Создать
+          Create
         </button>
       </form>
     </div>

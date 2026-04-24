@@ -15,12 +15,12 @@ export default async function AdminChallengesListPage() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Челленджи</h1>
+        <h1 className="text-xl font-semibold">Challenges</h1>
         <Link
           href="/admin/challenges/new"
           className="rounded-xl bg-amber-900 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500"
         >
-          Добавить
+          Add
         </Link>
       </div>
 
@@ -41,7 +41,7 @@ export default async function AdminChallengesListPage() {
                 href={`/admin/challenges/${c.id}/edit`}
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-600"
               >
-                Редактировать
+                Edit
               </Link>
               <AdminDeleteChallengeForm challengeId={c.id} title={c.title} />
             </div>
@@ -50,15 +50,15 @@ export default async function AdminChallengesListPage() {
       </ul>
 
       {rows.length === 0 && (
-        <p className="mt-8 text-sm text-zinc-500">Пока нет челленджей.</p>
+        <p className="mt-8 text-sm text-zinc-500">No challenges yet.</p>
       )}
 
       <p className="mt-10 text-xs text-zinc-500">
-        Прямая ссылка на эту страницу:{" "}
+        Direct URL for this page:{" "}
         <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">
           /admin/challenges
         </code>
-        — доступна только если ваш email указан в{" "}
+        — only available if your email is listed in{" "}
         <code className="rounded bg-zinc-100 px-1 dark:bg-zinc-900">
           ADMIN_EMAILS
         </code>

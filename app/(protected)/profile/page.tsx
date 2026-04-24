@@ -43,13 +43,13 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Профиль</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
         {profile?.display_name ?? user.email}
       </p>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Мои команды</h2>
+        <h2 className="text-lg font-semibold">My teams</h2>
         <ul className="mt-3 space-y-2">
           {teamIds.map((tid) => (
             <li key={tid}>
@@ -64,9 +64,9 @@ export default async function ProfilePage() {
         </ul>
         {teamIds.length === 0 && (
           <p className="mt-2 text-sm text-zinc-500">
-            Нет команд —{" "}
+            No teams yet —{" "}
             <Link href="/teams/new" className="underline">
-              создайте
+              create one
             </Link>
             .
           </p>
@@ -74,7 +74,7 @@ export default async function ProfilePage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Челленджи по командам</h2>
+        <h2 className="text-lg font-semibold">Challenges by team</h2>
         <ul className="mt-3 space-y-3">
           {enrollments.map((e) => {
             const raw = e.challenges;
@@ -83,7 +83,7 @@ export default async function ProfilePage() {
               ch && typeof ch === "object" && "id" in ch && "title" in ch
                 ? (ch as { id: string; title: string })
                 : null;
-            const tname = teamsById[e.team_id as string]?.name ?? "Команда";
+            const tname = teamsById[e.team_id as string]?.name ?? "Team";
             if (!challenge) return null;
             const active = !e.completed_at;
             return (
@@ -94,17 +94,17 @@ export default async function ProfilePage() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium">{challenge.title}</p>
-                    <p className="text-sm text-zinc-500">Команда: {tname}</p>
+                    <p className="text-sm text-zinc-500">Team: {tname}</p>
                   </div>
                   {active ? (
                     <Link
                       href={`/challenges/${challenge.id}/teams/${e.team_id}/chat`}
                       className="text-sm font-medium text-teal-700 dark:text-teal-400"
                     >
-                      Чат →
+                      Chat →
                     </Link>
                   ) : (
-                    <span className="text-xs text-zinc-500">Завершён</span>
+                    <span className="text-xs text-zinc-500">Completed</span>
                   )}
                 </div>
               </li>
@@ -113,7 +113,7 @@ export default async function ProfilePage() {
         </ul>
         {enrollments.length === 0 && teamIds.length > 0 && (
           <p className="mt-2 text-sm text-zinc-500">
-            Ни одна команда пока не вступила в челлендж.
+            None of your teams are in a challenge yet.
           </p>
         )}
       </section>

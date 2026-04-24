@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChallengeEnroll } from "@/components/challenge-enroll";
+import { QuitChallengeButton } from "@/components/quit-challenge-button";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
@@ -66,7 +67,11 @@ export default async function ChallengeDetailPage({ params }: Props) {
   const enrolledTeams = (enrolledTeamsData ?? []) as { id: string; name: string }[];
 
   const src =
-    challenge.image_url?.startsWith("/") ? challenge.image_url : challenge.image_url || "/challenges/30-day-abs-cover.svg";
+    challenge.image_url?.startsWith("/")
+      ? challenge.image_url
+      : challenge.image_url || "/challenges/30-day-abs-cover.svg";
+
+  const dayWord = challenge.interval_days === 1 ? "day" : "days";
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
@@ -74,7 +79,7 @@ export default async function ChallengeDetailPage({ params }: Props) {
         href="/challenges"
         className="text-sm text-teal-700 hover:underline dark:text-teal-400"
       >
-        ← Все челленджи
+        ← All challenges
       </Link>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
@@ -101,47 +106,53 @@ export default async function ChallengeDetailPage({ params }: Props) {
 
       <div className="mt-6 flex flex-wrap gap-6 text-sm text-zinc-600 dark:text-zinc-400">
         <span>
-          Сейчас проходят:{" "}
+          Active now:{" "}
           <strong className="text-zinc-900 dark:text-zinc-100">
             {stats.active_users}
           </strong>{" "}
-          чел.
+          users
         </span>
         <span>
-          Прошли:{" "}
+          Completed:{" "}
           <strong className="text-zinc-900 dark:text-zinc-100">
             {stats.completed_users}
           </strong>{" "}
-          чел.
+          users
         </span>
         <span>
-          Посты: раз в {challenge.interval_days}{" "}
-          {challenge.interval_days === 1 ? "день" : "дн."}
+          Posts every {challenge.interval_days} {dayWord}
         </span>
       </div>
 
       <div className="mt-10 space-y-6 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-        <h2 className="text-lg font-semibold">Участие</h2>
+        <h2 className="text-lg font-semibold">Your teams</h2>
         {enrolledTeams.length > 0 ? (
           <ul className="space-y-3">
             {enrolledTeams.map((t) => (
               <li
                 key={t.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900/40"
+                className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between dark:border-zinc-700 dark:bg-zinc-900/40"
               >
                 <span className="font-medium">{t.name}</span>
-                <Link
-                  href={`/challenges/${id}/teams/${t.id}/chat`}
-                  className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900"
-                >
-                  Чат команды
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/challenges/${id}/teams/${t.id}/chat`}
+                    className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  >
+                    Team chat
+                  </Link>
+                  <QuitChallengeButton
+                    teamId={t.id}
+                    challengeId={id}
+                    teamName={t.name}
+                  />
+                </div>
               </li>
             ))}
           </ul>
         ) : (
           <p className="text-sm text-zinc-500">
-            Вы ещё не вступили в этот челлендж ни с одной командой.
+            You haven’t joined this challenge with any team yet.
           </p>
         )}
 

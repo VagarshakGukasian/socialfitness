@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: Props) {
     <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
       {params.error === "oauth" && (
         <p className="mb-6 max-w-sm rounded-lg bg-amber-50 px-4 py-3 text-center text-sm text-amber-900 dark:bg-amber-950/50 dark:text-amber-100">
-          Не удалось войти через Google. Попробуйте снова или используйте email.
+          Google sign-in failed. Try again or use email and password.
         </p>
       )}
       <AuthForm mode="login" />

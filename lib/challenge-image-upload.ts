@@ -21,11 +21,11 @@ export async function uploadChallengeCoverImage(
   const ext = MIME_TO_EXT[mime];
   if (!ext) {
     throw new Error(
-      "Допустимы только JPEG, PNG, WebP, GIF и SVG."
+      "Only JPEG, PNG, WebP, GIF, and SVG are allowed."
     );
   }
   if (file.size > MAX_BYTES) {
-    throw new Error("Файл больше 5 МБ.");
+    throw new Error("File must be 5 MB or smaller.");
   }
 
   const path = `covers/${randomUUID()}.${ext}`;

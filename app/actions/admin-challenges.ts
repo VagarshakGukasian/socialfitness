@@ -53,7 +53,7 @@ export async function adminCreateChallenge(formData: FormData) {
     parseInt(String(formData.get("interval_days") ?? "1"), 10) || 1
   );
 
-  if (!title) throw new Error("Нужно название");
+  if (!title) throw new Error("Title is required");
 
   const { data, error } = await admin
     .from("challenges")
@@ -100,7 +100,7 @@ export async function adminUpdateChallenge(challengeId: string, formData: FormDa
     parseInt(String(formData.get("interval_days") ?? "1"), 10) || 1
   );
 
-  if (!title) throw new Error("Нужно название");
+  if (!title) throw new Error("Title is required");
 
   const { error } = await admin
     .from("challenges")

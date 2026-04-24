@@ -91,16 +91,16 @@ export function ChatRoom({
               <span>
                 {m.is_official ? (
                   <strong className="text-teal-800 dark:text-teal-200">
-                    Челлендж
+                    Challenge
                   </strong>
                 ) : (
                   <strong className="text-zinc-800 dark:text-zinc-200">
-                    {m.author_name ?? "Участник"}
+                    {m.author_name ?? "Member"}
                   </strong>
                 )}
               </span>
               <time dateTime={m.created_at}>
-                {new Date(m.created_at).toLocaleString("ru-RU", {
+                {new Date(m.created_at).toLocaleString("en-US", {
                   day: "numeric",
                   month: "short",
                   hour: "2-digit",
@@ -145,7 +145,7 @@ export function ChatRoom({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Сообщение команде…"
+          placeholder="Message your team…"
           rows={2}
           className="min-h-[44px] flex-1 resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
         />
@@ -155,7 +155,7 @@ export function ChatRoom({
           onClick={send}
           className="self-end rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
         >
-          {sending ? "…" : "Отправить"}
+          {sending ? "…" : "Send"}
         </button>
       </div>
     </div>

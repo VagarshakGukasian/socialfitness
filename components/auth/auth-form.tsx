@@ -40,7 +40,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           return;
         }
         setMessage(
-          "Проверьте почту: мы отправили ссылку для подтверждения. После подтверждения вы попадёте в приложение."
+          "Check your email for a confirmation link. After confirming, you can sign in."
         );
       } else {
         const { error: err } = await supabase.auth.signInWithPassword({
@@ -52,7 +52,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         router.refresh();
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ошибка");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -71,11 +71,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
     if (err) setError(err.message);
   }
 
-  const title = mode === "login" ? "Вход" : "Регистрация";
+  const title = mode === "login" ? "Sign in" : "Sign up";
   const alternateLabel =
-    mode === "login" ? "Нет аккаунта?" : "Уже есть аккаунт?";
+    mode === "login" ? "No account?" : "Already have an account?";
   const alternateHref = mode === "login" ? "/signup" : "/login";
-  const alternateAction = mode === "login" ? "Зарегистрироваться" : "Войти";
+  const alternateAction = mode === "login" ? "Sign up" : "Sign in";
 
   return (
     <div className="w-full max-w-sm space-y-8">
@@ -119,7 +119,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             htmlFor="password"
             className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Пароль
+            Password
           </label>
           <input
             id="password"
@@ -153,7 +153,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           disabled={loading}
           className="flex w-full items-center justify-center rounded-xl bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
-          {loading ? "…" : mode === "login" ? "Войти" : "Создать аккаунт"}
+          {loading ? "…" : mode === "login" ? "Sign in" : "Create account"}
         </button>
       </form>
 
@@ -162,9 +162,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <div className="w-full border-t border-zinc-200 dark:border-zinc-700" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[var(--background)] px-2 text-zinc-500">
-            или
-          </span>
+          <span className="bg-[var(--background)] px-2 text-zinc-500">or</span>
         </div>
       </div>
 

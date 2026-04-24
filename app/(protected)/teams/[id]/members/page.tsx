@@ -43,10 +43,9 @@ export default async function TeamMembersPage({ params }: Props) {
       >
         ← {team.name}
       </Link>
-      <h1 className="mt-6 text-xl font-semibold">Добавить в команду</h1>
+      <h1 className="mt-6 text-xl font-semibold">Add to team</h1>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        Поиск по отображаемому имени в приложении. Пользователь должен быть
-        зарегистрирован.
+        Search by display name. The person must already have an account.
       </p>
       <div className="mt-8">
         <TeamMemberSearch teamId={id} existingUserIds={existingUserIds} />

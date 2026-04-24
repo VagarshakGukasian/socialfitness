@@ -61,7 +61,7 @@ export default async function TeamChallengeChatPage({ params }: Props) {
       .select("id, display_name")
       .in("id", authorIds);
     for (const p of profs ?? []) {
-      nameById[p.id as string] = (p.display_name as string) ?? "Участник";
+      nameById[p.id as string] = (p.display_name as string) ?? "Member";
     }
   }
 
@@ -99,13 +99,13 @@ export default async function TeamChallengeChatPage({ params }: Props) {
         href={`/challenges/${challengeId}`}
         className="text-sm text-teal-700 hover:underline dark:text-teal-400"
       >
-        ← {challenge?.title ?? "Челлендж"}
+        ← {challenge?.title ?? "Challenge"}
       </Link>
       <h1 className="mt-4 text-xl font-semibold">
-        Чат: {team?.name ?? "Команда"}
+        Chat: {team?.name ?? "Team"}
       </h1>
       <p className="mt-1 text-sm text-zinc-500">
-        Сообщения челленджа и переписка вашей команды в одной ленте.
+        Challenge announcements and your team’s messages in one thread.
       </p>
 
       <div className="mt-6 flex-1">

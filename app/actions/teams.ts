@@ -46,3 +46,24 @@ export async function enrollTeamInChallenge(teamId: string, challengeId: string)
   revalidatePath(`/challenges/${challengeId}`);
   revalidatePath("/profile");
 }
+
+export async function quitTeamChallenge(teamId: string, challengeId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase.rpc("quit_team_challenge", {
+    p_team_id: teamId,
+    p_challenge_id: challengeId,
+  });
+
+  if (error) throw error;
+
+  revalidatePath("/challenges");
+  revalidatePath(`/challenges/${challengeId}`);
+  revalidatePath(`/challenges/${challengeId}/teams/${teamId}/chat`);
+  revalidatePath(`/teams/${teamId}`);
+  revalidatePath("/profile");
+}

@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { addTeamMember } from "@/app/actions/teams";
 import { createClient } from "@/lib/supabase/client";
 
-type UserRow = { id: string; display_name: string | null };
+type UserRow = { id: string; display_name: string | null; email: string | null };
 
 export function TeamMemberSearch({
   teamId,
@@ -34,8 +34,8 @@ export function TeamMemberSearch({
     setError(null);
     const { data, error: err } = await supabase
       .from("users")
-      .select("id, display_name")
-      .ilike("display_name", `%${term}%`)
+      .select("id, display_name, email")
+      .or(`display_name.ilike.%${term}%,email.ilike.%${term}%`)
       .limit(25);
     setLoading(false);
     if (err) {
@@ -53,7 +53,7 @@ export function TeamMemberSearch({
       router.refresh();
       setUsers((prev) => prev.filter((u) => u.id !== userId));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Ошибка");
+      setError(e instanceof Error ? e.message : "Error");
     } finally {
       setAdding(null);
     }
@@ -65,7 +65,7 @@ export function TeamMemberSearch({
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Имя в профиле (от 2 букв)"
+          placeholder="Name or email (min 2 characters)"
           className="flex-1 rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
         />
         <button
@@ -74,7 +74,7 @@ export function TeamMemberSearch({
           disabled={loading}
           className="rounded-xl bg-zinc-900 px-4 py-2 text-sm text-white dark:bg-zinc-100 dark:text-zinc-900"
         >
-          {loading ? "…" : "Найти"}
+          {loading ? "…" : "Search"}
         </button>
       </div>
       {error && (
@@ -83,16 +83,19 @@ export function TeamMemberSearch({
       <ul className="space-y-2">
         {users.map((u) => {
           const inTeam = existing.has(u.id);
+          const name = u.display_name?.trim() || "—";
+          const email = u.email?.trim() || "—";
           return (
             <li
               key={u.id}
-              className="flex items-center justify-between rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-800"
             >
-              <span className="text-sm">
-                {u.display_name ?? u.id.slice(0, 8) + "…"}
-              </span>
+              <div>
+                <p className="text-sm font-medium">{name}</p>
+                <p className="text-xs text-zinc-500">{email}</p>
+              </div>
               {inTeam ? (
-                <span className="text-xs text-zinc-500">Уже в команде</span>
+                <span className="text-xs text-zinc-500">In team</span>
               ) : (
                 <button
                   type="button"
@@ -100,7 +103,7 @@ export function TeamMemberSearch({
                   onClick={() => add(u.id)}
                   className="text-sm font-medium text-teal-700 dark:text-teal-400"
                 >
-                  {adding === u.id ? "…" : "Добавить"}
+                  {adding === u.id ? "…" : "Add"}
                 </button>
               )}
             </li>
