@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
+import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProtectedLayout({
@@ -14,9 +15,11 @@ export default async function ProtectedLayout({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const isAdmin = isAdminEmail(user.email ?? "");
+
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppHeader />
+      <AppHeader isAdmin={isAdmin} />
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-0 pb-[calc(3.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
         {children}
       </div>

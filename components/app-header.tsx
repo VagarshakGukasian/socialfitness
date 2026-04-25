@@ -2,18 +2,14 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { DASHBOARD_NAV_LINKS } from "@/lib/dashboard-nav";
-import { isAdminEmail } from "@/lib/admin";
-import { createClient } from "@/lib/supabase/server";
 
-export async function AppHeader() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const email = user.email ?? "";
-  const isAdmin = isAdminEmail(email);
-
+/**
+ * Must be rendered only inside routes that already verified the session
+ * (e.g. protected layout). Do not call getUser() here — a second Supabase
+ * read can return null on some hosts (Vercel/edge) while the layout user
+ * is still valid, which would hide the entire bar.
+ */
+export function AppHeader({ isAdmin }: { isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-20 border-b border-zinc-200/90 bg-[var(--background)]/95 backdrop-blur dark:border-zinc-800/90">
       <div className="mx-auto max-w-5xl px-3 sm:px-4">
