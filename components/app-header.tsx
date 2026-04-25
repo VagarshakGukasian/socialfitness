@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { LogOut, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
+import { DASHBOARD_NAV_LINKS } from "@/lib/dashboard-nav";
 import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,51 +15,16 @@ export async function AppHeader() {
   const isAdmin = isAdminEmail(email);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-zinc-200/90 bg-[var(--background)]/90 backdrop-blur dark:border-zinc-800/90">
-      <div className="mx-auto flex h-12 max-w-5xl items-center justify-between gap-3 px-3 sm:px-4">
-        <Link
-          href="/challenges"
-          className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
-        >
-          Soc<span className="text-[var(--accent)]">Fit</span>
-        </Link>
-
-        <nav
-          className="hidden min-w-0 flex-1 items-center justify-end gap-1 sm:flex sm:gap-2 md:gap-3"
-          aria-label="Sections"
-        >
-          <HeaderLink href="/challenges">Challenges</HeaderLink>
-          <HeaderLink href="/feed">Feed</HeaderLink>
+    <header className="sticky top-0 z-20 border-b border-zinc-200/90 bg-[var(--background)]/95 backdrop-blur dark:border-zinc-800/90">
+      <div className="mx-auto max-w-5xl px-3 sm:px-4">
+        <div className="flex h-11 items-center justify-between gap-2">
           <Link
-            href="/users"
-            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-            title="People"
+            href="/challenges"
+            className="shrink-0 text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
           >
-            <Users className="h-4 w-4" aria-hidden />
-            <span className="hidden lg:inline">People</span>
+            Soc<span className="text-[var(--accent)]">Fit</span>
           </Link>
-          <HeaderLink href="/teams">Teams</HeaderLink>
-          <HeaderLink href="/dashboard">Hub</HeaderLink>
-          {isAdmin && (
-            <Link
-              href="/admin/challenges"
-              className="rounded-lg px-2 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100/80 dark:text-amber-200 dark:hover:bg-amber-950/50"
-            >
-              Admin
-            </Link>
-          )}
-          <HeaderLink href="/profile">Profile</HeaderLink>
-        </nav>
-
-        <div className="flex items-center gap-1">
-          <Link
-            href="/users"
-            className="inline-flex rounded-lg p-2 text-zinc-600 sm:hidden dark:text-zinc-400"
-            aria-label="People"
-          >
-            <Users className="h-5 w-5" />
-          </Link>
-          <form action={signOut}>
+          <form action={signOut} className="shrink-0">
             <button
               type="submit"
               className="inline-flex rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
@@ -68,24 +34,30 @@ export async function AppHeader() {
             </button>
           </form>
         </div>
+
+        <nav
+          className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 border-t border-zinc-200/60 py-2.5 sm:gap-x-2 dark:border-zinc-800/60"
+          aria-label="App sections"
+        >
+          {DASHBOARD_NAV_LINKS.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 sm:px-2.5 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            >
+              {label}
+            </Link>
+          ))}
+          {isAdmin && (
+            <Link
+              href="/admin/challenges"
+              className="shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-amber-800 hover:bg-amber-100/80 sm:px-2.5 dark:text-amber-200 dark:hover:bg-amber-950/50"
+            >
+              Admin
+            </Link>
+          )}
+        </nav>
       </div>
     </header>
-  );
-}
-
-function HeaderLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="whitespace-nowrap rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-    >
-      {children}
-    </Link>
   );
 }
