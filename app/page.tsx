@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AppTopNav } from "@/components/app-top-nav";
+import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -6,10 +8,22 @@ export default async function Home() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const isAuthed = Boolean(user);
+  const isAdmin = Boolean(user?.email && isAdminEmail(user.email));
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-24 dark:bg-zinc-950">
-      <main className="mx-auto flex w-full max-w-lg flex-col items-center text-center">
+    <div
+      className={`flex min-h-dvh flex-1 flex-col ${isAuthed ? "bg-zinc-50 dark:bg-zinc-950" : "items-center justify-center bg-zinc-50 dark:bg-zinc-950"}`}
+    >
+      {isAuthed && <AppTopNav isAdmin={isAdmin} />}
+      <div
+        className={
+          isAuthed
+            ? "flex flex-1 flex-col items-center justify-center px-6 py-10"
+            : "flex flex-1 flex-col items-center justify-center px-6 py-24"
+        }
+      >
+        <main className="mx-auto flex w-full max-w-lg flex-col items-center text-center">
         <p className="text-sm font-medium uppercase tracking-widest text-zinc-500">
           Social Fitness
         </p>
@@ -52,7 +66,8 @@ export default async function Home() {
             </>
           )}
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
