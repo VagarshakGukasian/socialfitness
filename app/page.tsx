@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { AppTopNav } from "@/components/app-top-nav";
-import { isAdminEmail } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -9,13 +7,11 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
   const isAuthed = Boolean(user);
-  const isAdmin = Boolean(user?.email && isAdminEmail(user.email));
 
   return (
     <div
       className={`flex min-h-dvh flex-1 flex-col ${isAuthed ? "bg-zinc-50 dark:bg-zinc-950" : "items-center justify-center bg-zinc-50 dark:bg-zinc-950"}`}
     >
-      {isAuthed && <AppTopNav isAdmin={isAdmin} />}
       <div
         className={
           isAuthed
