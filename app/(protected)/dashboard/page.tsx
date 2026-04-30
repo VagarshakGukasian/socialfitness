@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getUserDisplayName } from "@/lib/user-display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +12,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const email = user.email ?? "";
-  const name =
-    (user.user_metadata?.full_name as string | undefined) ??
-    (user.user_metadata?.name as string | undefined) ??
-    email;
+  const name = getUserDisplayName(user);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-4 sm:py-10">
@@ -23,7 +20,7 @@ export default async function DashboardPage() {
         <LayoutGrid className="h-6 w-6 text-[var(--accent)]" />
         Hub
       </div>
-      <p className="text-sm text-zinc-500">Hi, {name.split("@")[0]}</p>
+      <p className="text-sm text-zinc-500">Hi, {name}</p>
     </div>
   );
 }
