@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -13,7 +12,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,8 +33,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           data: { session },
         } = await supabase.auth.getSession();
         if (session) {
-          router.push("/dashboard");
-          router.refresh();
+          window.location.href = "/dashboard";
           return;
         }
         setMessage(
@@ -48,8 +45,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           password,
         });
         if (err) throw err;
-        router.push("/dashboard");
-        router.refresh();
+        window.location.href = "/dashboard";
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
