@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
           {
             protocol: "https",
             hostname: supabaseImageHost,
-            pathname: "/storage/v1/object/public/challenge-images/**",
+            pathname: "/storage/v1/object/public/**",
           },
         ]
       : [],

@@ -15,7 +15,7 @@ export default async function TeamMembersPage({ params }: Props) {
 
   const { data: team } = await supabase
     .from("teams")
-    .select("name")
+    .select("name, created_by, is_solo")
     .eq("id", id)
     .maybeSingle();
 
@@ -27,6 +27,7 @@ export default async function TeamMembersPage({ params }: Props) {
     .maybeSingle();
 
   if (!team || !memberCheck) notFound();
+  if (team.is_solo || team.created_by !== user.id) notFound();
 
   const { data: members } = await supabase
     .from("team_members")

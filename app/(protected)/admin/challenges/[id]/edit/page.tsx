@@ -25,9 +25,7 @@ export default async function AdminEditChallengePage({ params }: Props) {
     .select("body, position")
     .eq("challenge_id", id)
     .order("position", { ascending: true });
-  const messageTemplatesText = (tmplRows ?? [])
-    .map((r) => r.body as string)
-    .join("\n");
+  const messageTemplateLines = (tmplRows ?? []).map((r) => r.body as string);
 
   async function updateAction(formData: FormData) {
     "use server";
@@ -52,7 +50,7 @@ export default async function AdminEditChallengePage({ params }: Props) {
       >
         <ChallengeFormFields
           challenge={challenge}
-          messageTemplatesText={messageTemplatesText}
+          messageTemplateLines={messageTemplateLines}
         />
         <div className="flex flex-wrap gap-3">
           <button

@@ -1,12 +1,14 @@
 import Image from "next/image";
+import { MessageTemplatesField } from "@/components/admin/message-templates-field";
 import type { ChallengeRow } from "@/lib/types/challenge";
 
 export function ChallengeFormFields({
   challenge,
-  messageTemplatesText = "",
+  messageTemplateLines,
 }: {
   challenge?: ChallengeRow | null;
-  messageTemplatesText?: string;
+  /** Body of each template in order (edit mode). Omit for one empty row in the UI. */
+  messageTemplateLines?: string[];
 }) {
   const sm = challenge?.schedule_mode ?? "evergreen";
   const previewSrc = challenge?.image_url?.trim() || null;
@@ -152,24 +154,10 @@ export function ChallengeFormFields({
           anytime.
         </p>
       </div>
-      <div>
-        <label
-          htmlFor="message_templates"
-          className="block text-sm font-medium"
-        >
-          Official message sequence
-        </label>
-        <textarea
-          id="message_templates"
-          name="message_templates"
-          rows={6}
-          defaultValue={messageTemplatesText}
-          placeholder="One line per post in order. When the list runs out, it loops."
-          className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 font-mono text-sm dark:border-zinc-700 dark:bg-zinc-950"
+      <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
+        <MessageTemplatesField
+          initialLines={messageTemplateLines ?? []}
         />
-        <p className="mt-1 text-xs text-zinc-500">
-          Cadence is “every N days” above. Used by automation (when wired).
-        </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

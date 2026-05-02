@@ -8,6 +8,30 @@ type Props = {
   searchParams: Promise<{ view?: string }>;
 };
 
+type AttachRow = {
+  media_url: string;
+  sort_order: number;
+  mime_type: string | null;
+};
+
+type MsgRow = {
+  id: string;
+  is_official: boolean;
+  body: string;
+  created_at: string;
+  author_id: string | null;
+  team_id: string | null;
+  challenge_message_attachments?: AttachRow[] | AttachRow | null;
+};
+
+function normalizeAttachments(raw: MsgRow["challenge_message_attachments"]): AttachRow[] {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  return [...arr].sort(
+    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  );
+}
+
 export default async function TeamChallengeChatPage({ params, searchParams }: Props) {
   const { id: challengeId, teamId } = await params;
   const { view } = await searchParams;
@@ -42,20 +66,23 @@ export default async function TeamChallengeChatPage({ params, searchParams }: Pr
     ? "You"
     : (team?.name as string) ?? "Team";
 
+  const selectCols =
+    "id, is_official, body, created_at, author_id, team_id, challenge_message_attachments ( media_url, sort_order, mime_type )";
+
   const { data: rawMessages } = allMode
     ? await supabase
         .from("challenge_messages")
-        .select("id, is_official, body, created_at, author_id, team_id")
+        .select(selectCols)
         .eq("challenge_id", challengeId)
         .order("created_at", { ascending: true })
     : await supabase
         .from("challenge_messages")
-        .select("id, is_official, body, created_at, author_id, team_id")
+        .select(selectCols)
         .eq("challenge_id", challengeId)
         .or(`is_official.eq.true,team_id.eq.${teamId}`)
         .order("created_at", { ascending: true });
 
-  const messages = rawMessages ?? [];
+  const messages = (rawMessages ?? []) as MsgRow[];
   const authorIds = [
     ...new Set(
       messages
@@ -116,17 +143,24 @@ export default async function TeamChallengeChatPage({ params, searchParams }: Pr
   const vms: ChatMessageVM[] = messages.map((m) => {
     const tid = m.team_id as string | null;
     const oth = tid && tid !== teamId ? teamNameById[tid] : null;
+    const atts = normalizeAttachments(m.challenge_message_attachments).map(
+      (a) => ({
+        url: a.media_url,
+        mimeType: a.mime_type,
+      })
+    );
     return {
-    id: m.id as string,
-    is_official: Boolean(m.is_official),
-    body: m.body as string,
-    created_at: m.created_at as string,
-    author_id: (m.author_id as string | null) ?? null,
-    author_name: m.author_id ? nameById[m.author_id as string] ?? null : null,
-    team_id: tid,
-    other_team_label: oth,
-    reactions: reactionsByMessage[m.id as string] ?? [],
-  };
+      id: m.id as string,
+      is_official: Boolean(m.is_official),
+      body: m.body as string,
+      created_at: m.created_at as string,
+      author_id: (m.author_id as string | null) ?? null,
+      author_name: m.author_id ? nameById[m.author_id as string] ?? null : null,
+      team_id: tid,
+      other_team_label: oth,
+      reactions: reactionsByMessage[m.id as string] ?? [],
+      attachments: atts,
+    };
   });
 
   const base = `/challenges/${challengeId}/teams/${teamId}/chat`;

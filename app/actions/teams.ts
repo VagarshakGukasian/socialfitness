@@ -1,25 +1,94 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { uploadTeamAvatarForUser } from "@/lib/team-avatar-upload";
+import {
+  isDefaultTeamAvatarUrl,
+  randomTeamAvatarUrl,
+} from "@/lib/team-default-avatars";
 import { createClient } from "@/lib/supabase/server";
 
-export async function createTeam(name: string) {
+export async function createTeamFromForm(formData: FormData) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  const defaultUrl = String(formData.get("team_avatar_default") ?? "").trim();
+  const avatarFile = formData.get("team_avatar");
+
+  let avatar_url = randomTeamAvatarUrl();
+  if (defaultUrl && isDefaultTeamAvatarUrl(defaultUrl)) {
+    avatar_url = defaultUrl;
+  }
+  if (avatarFile instanceof File && avatarFile.size > 0) {
+    avatar_url = await uploadTeamAvatarForUser(supabase, user.id, avatarFile);
+  }
+
   const { data, error } = await supabase
     .from("teams")
-    .insert({ name: name.trim(), created_by: user.id, is_solo: false })
+    .insert({
+      name,
+      created_by: user.id,
+      is_solo: false,
+      avatar_url,
+    })
     .select("id")
     .single();
 
   if (error) throw error;
+  const id = data.id as string;
   revalidatePath("/teams");
   revalidatePath("/profile");
-  return data.id as string;
+  redirect(`/teams/${id}`);
+}
+
+export async function updateTeamFromForm(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const teamId = String(formData.get("team_id") ?? "").trim();
+  if (!teamId) throw new Error("Missing team");
+
+  const { data: team } = await supabase
+    .from("teams")
+    .select("id, created_by, is_solo")
+    .eq("id", teamId)
+    .maybeSingle();
+
+  if (!team || team.created_by !== user.id || team.is_solo) {
+    throw new Error("Not allowed");
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+  const defaultUrl = String(formData.get("team_avatar_default") ?? "").trim();
+  const avatarFile = formData.get("team_avatar");
+
+  const patch: { name?: string; avatar_url?: string } = {};
+  if (name) patch.name = name;
+
+  if (avatarFile instanceof File && avatarFile.size > 0) {
+    patch.avatar_url = await uploadTeamAvatarForUser(supabase, user.id, avatarFile);
+  } else if (defaultUrl && isDefaultTeamAvatarUrl(defaultUrl)) {
+    patch.avatar_url = defaultUrl;
+  }
+
+  if (Object.keys(patch).length === 0) return;
+
+  const { error } = await supabase.from("teams").update(patch).eq("id", teamId);
+  if (error) throw error;
+
+  revalidatePath(`/teams/${teamId}`);
+  revalidatePath("/teams");
+  revalidatePath("/profile");
 }
 
 export async function addTeamMember(teamId: string, userId: string) {
